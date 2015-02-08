@@ -23,8 +23,8 @@ void Pasafer::set_main_password(QString password)
 
     hash_func->reset();
     hash_func->addData(qb.data(), qb.length());
-#define SAULT "*D.j@|}jd9D4+_(&>G"
-    hash_func->addData(SAULT, sizeof(SAULT));
+#define SALT "*D.j@|}jd9D4+_(&>G"
+    hash_func->addData(SALT, sizeof(SALT));
     hash_func->addData(qb.data(), qb.length());
     qb = hash_func->result();
     memcpy(main_password_char, qb.data(), qb.length());
@@ -39,8 +39,8 @@ void Pasafer::set_key(QString key)
 
     hash_func->reset();
     hash_func->addData(qb.data(), qb.length());
-#define SAULT2 "LN#d>u!(9l:T31pQ"
-    hash_func->addData(SAULT2, sizeof(SAULT2));
+#define SALT2 "LN#d>u!(9l:T31pQ"
+    hash_func->addData(SALT2, sizeof(SALT2));
     hash_func->addData(qb.data(), qb.length());
     qb = hash_func->result();
     memcpy(key_char, qb.data(), qb.length());
@@ -137,9 +137,9 @@ QString Pasafer::get_password(int len)
 
     hash_func->reset();
     hash_func->addData((const char*)main_password_char, hash_len);
-#define SAULT3 "sf4d#1dhpj>,m"
+#define SALT3 "sf4d#1dhpj>,m"
     hash_func->addData((const char*)key_char, hash_len);
-    hash_func->addData(SAULT3, sizeof(SAULT3));
+    hash_func->addData(SALT3, sizeof(SALT3));
     qb = hash_func->result();
     memcpy(r_key, qb.data(), qb.length());
 

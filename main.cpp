@@ -2,6 +2,7 @@
 #include <QDebug>
 #include "pasafer.h"
 
+#define WIN
 
 #ifdef WIN
 #include <windows.h>
@@ -35,11 +36,11 @@ int usage(QString cmd)
 {
     QTextStream out(stdout);
 
-    out << "Usage: "<< cmd <<" [-g --file file_name --size file_size] [-r --file file_name --key key]\n";
-    out << "  -g      generate sands file by with size(--size)\n";
-    out << "  -r      read a password from sands file by providing a key, and Main Password\n";
+    out << "Usage: "<< cmd <<" [-g [--file file_name [--size file_size]]] [-k key [--file file_name]]\n";
+    out << "  -g      generate pasafer sands file\n";
+    out << "  -k      key of password to get\n";
     out << "  --size  size of sands file to generate\n";
-    out << "  --key   key of a password to get from sands file\n";
+    out << "  --file  pasafer sands file\n";
     return 0;
 }
 
@@ -60,14 +61,14 @@ QString get_main_password()
 
 int main(int argc, char *argv[])
 {
-    QString file_name="";
-    qint32  file_size = 0;
+    QString file_name="pasafer.sands";
+    qint32  file_size = 1;
     QString key="";
     QString password;
     Pasafer pasafer(QCryptographicHash::Sha512);
 
     bool is_gen_sands_file = false;
-    bool is_get_password = false;
+    bool is_get_password = true;
 
 
     for (int i = 1; i < argc; i++) {
@@ -75,9 +76,6 @@ int main(int argc, char *argv[])
         if (arg == "-g") {
             is_gen_sands_file = true;
             is_get_password = false;
-        } else if (arg == "-r"){
-            is_get_password = true;
-            is_gen_sands_file = false;
         } else {
             if (i+1 >= argc) {
                 usage(argv[0]);
@@ -87,22 +85,17 @@ int main(int argc, char *argv[])
                 file_name = argv[++i];
             } else if (arg == "--size") {
                 file_size = QString(argv[++i]).toInt();
-            } else if (arg == "--key") {
+            } else if (arg == "-k") {
                 key = argv[++i];
             }
         }
     }
 
     if(is_gen_sands_file) {
-        if(file_name=="" || file_size == 0) {
-            usage(argv[0]);
-            return 0;
-        }
         pasafer.set_sands_file(file_name);
         return pasafer.gen_sands_file(file_size);
-    }
-    if(is_get_password) {
-        if (file_name=="" || key == "") {
+    } else if(is_get_password) {
+        if (key == "") {
             usage(argv[0]);
             return 0;
         }
@@ -114,8 +107,8 @@ int main(int argc, char *argv[])
         QTextStream out(stdout);
         out << password <<"\n";
         return 0;
+    } else {
+        usage(argv[0]);
+        return 0;
     }
-
-    usage(argv[0]);
-    return 0;
  }
