@@ -181,6 +181,7 @@ QString Pasafer::get_password(int len)
         transform(states[state_index], data_nums, 1,0);
         transform(data_nums, this->main_password_char, 1, 1);
         transform(data_nums, states[state_index], 1,1);
+        transform(r_key,data_nums, 1, 0);
 
         state_index += (data_nums[r_key[1]%hash_len] + states[state_index][r_key[0]%hash_len]);
         state_index %= MAX_STATES_NUM;
