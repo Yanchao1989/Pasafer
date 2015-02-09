@@ -2,7 +2,7 @@
 #include "pasafer.h"
 #include "thread_random.h"
 
-Pasafer::Pasafer(int hash_type=QCryptographicHash::Sha256)
+Pasafer::Pasafer(int hash_type=QCryptographicHash::Sha1)
 {
     hash_func = NULL;
     set_hash_func(hash_type);
@@ -55,6 +55,7 @@ void Pasafer::set_hash_func(int hash_type)
         case QCryptographicHash::Sha1:
             hash_len = 20;
             break;
+#if 0
         case QCryptographicHash::Sha224:
             hash_len = 26;
             break;
@@ -79,9 +80,10 @@ void Pasafer::set_hash_func(int hash_type)
         case QCryptographicHash::Sha3_512:
             hash_len = 64;
             break;
+#endif
         default:
-            hash_type = QCryptographicHash::Sha256;
-            hash_len = 32;
+            hash_type = QCryptographicHash::Sha1;
+            hash_len = 20;
             break;
     }
     if (hash_func) {

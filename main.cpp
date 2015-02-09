@@ -2,7 +2,6 @@
 #include <QDebug>
 #include "pasafer.h"
 
-#define WIN
 
 #ifdef WIN
 #include <windows.h>
@@ -65,7 +64,7 @@ int main(int argc, char *argv[])
     qint32  file_size = 1;
     QString key="";
     QString password;
-    Pasafer pasafer(QCryptographicHash::Sha512);
+    Pasafer pasafer(QCryptographicHash::Sha1);
 
     bool is_gen_sands_file = false;
     bool is_get_password = true;
