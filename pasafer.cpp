@@ -127,6 +127,7 @@ QString Pasafer::get_password(int len)
     uchar password[MAX_STATE_LEN];
     int state_index = MAX_STATES_NUM - 1;
     int i,j;
+    int running = 1;
 
     memset(password, 0, sizeof(password));
 
@@ -157,22 +158,28 @@ QString Pasafer::get_password(int len)
         transform(states[i], this->key_char, 3, 0);
     }
 
-    while(true)
+    while(running)
     {
-        transform(r_key,states[state_index],2, 1);
+        transform(r_key,states[state_index],2, 0);
         transform(states[state_index],r_key,1,0);
-        transform(states[state_index], this->main_password_char, 1, 0);
+        transform(states[state_index], this->main_password_char, 1, 1);
         transform(states[state_index], this->key_char, 1, 1);
 
         i = file.read((char *)data_nums, hash_len);
         if(i != hash_len)
         {
-            break;
+            if (i) {
+                buff_hash((const uchar*)data_nums, i, data_nums);
+                transform(data_nums, states[state_index], 1,0);
+            } else {
+                break;
+            }
+            running  = 0;
         }
+        transform(data_nums, r_key, 1,0);
         transform(states[state_index], data_nums, 1,0);
-        transform(data_nums, states[state_index], 1,0);
-        transform(data_nums, r_key, 1,1);
         transform(data_nums, this->main_password_char, 1, 1);
+        transform(data_nums, states[state_index], 1,1);
 
         state_index += (data_nums[r_key[1]%hash_len] + states[state_index][r_key[0]%hash_len]);
         state_index %= MAX_STATES_NUM;
