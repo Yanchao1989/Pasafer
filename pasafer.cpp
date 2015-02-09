@@ -122,6 +122,7 @@ QString Pasafer::get_password(int len)
 {
     QFile file;
     QByteArray qb;
+    QByteArray base64;
     int per_byte = hash_len/len;
     uchar data_nums[MAX_STATE_LEN];
     uchar password[MAX_STATE_LEN];
@@ -191,9 +192,10 @@ QString Pasafer::get_password(int len)
             password[i] ^= r_key[i*per_byte+j];
         }
     }
-    QByteArray base64 = (QByteArray((const char *)password)).toBase64();
-    base64.remove(len, base64.length()-len);
 
+    base64.setRawData((const char *)password, len);
+    base64 = base64.toBase64();
+    base64.remove(len, base64.length()-len);
     return QString(base64);
 
 }
