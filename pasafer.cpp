@@ -93,13 +93,11 @@ void Pasafer::set_hash_func(int hash_type)
 }
 
 
-int Pasafer::gen_sands_file(qint64 file_size)
+int Pasafer::gen_sands_file(qint32 file_size)
 {
     thread_random rand_gen;
     uchar buff[1024];
     QFile  f;
-
-    file_size *= 1024;
 
     f.setFileName(sands_file_name);
     if(f.open(QIODevice::WriteOnly))
@@ -154,15 +152,17 @@ QString Pasafer::get_password(int len)
     {
         file.read((char *)states[i], hash_len);
         transform(this->r_key, states[i], 4, 0);
-        transform(states[i], this->r_key, 4, 1);
-        transform(states[i], this->main_password_char, 1, 1);
+        transform(states[i], this->r_key, 1, 1);
+        transform(states[i], this->main_password_char, 2, 1);
+        transform(states[i], this->key_char, 3, 0);
     }
 
     while(true)
     {
         transform(r_key,states[state_index],2, 1);
         transform(states[state_index],r_key,1,0);
-        transform(states[state_index], this->main_password_char, 1, 1);
+        transform(states[state_index], this->main_password_char, 1, 0);
+        transform(states[state_index], this->key_char, 1, 1);
 
         i = file.read((char *)data_nums, hash_len);
         if(i != hash_len)
@@ -171,9 +171,10 @@ QString Pasafer::get_password(int len)
         }
         transform(states[state_index], data_nums, 1,0);
         transform(data_nums, states[state_index], 1,0);
-        transform(this->r_key, data_nums, 1,1);
+        transform(data_nums, r_key, 1,1);
+        transform(data_nums, this->main_password_char, 1, 1);
 
-        state_index += data_nums[0];
+        state_index += (data_nums[r_key[1]%hash_len] + states[state_index][r_key[0]%hash_len]);
         state_index %= MAX_STATES_NUM;
     }
     file.close();

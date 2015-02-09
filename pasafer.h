@@ -13,7 +13,7 @@ class Pasafer
 {
 public:
     Pasafer(int hash_type);
-    int     gen_sands_file(qint64 file_size);
+    int     gen_sands_file(qint32 file_size);
     QString get_password(int len);
 
     void set_sands_file(QString file);
