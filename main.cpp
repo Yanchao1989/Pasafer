@@ -35,9 +35,10 @@ int usage(QString cmd)
 {
     QTextStream out(stdout);
 
-    out << "Usage: "<< cmd <<" [-k key [--file file_name]] [-g [--file file_name [--size file_size]]]\n";
+    out << "Usage: "<< cmd <<" [-k key [--file file_name] [-l length]] [-g [--file file_name [--size file_size]]]\n";
     out << "  -k      key of password to get\n";
     out << "  -g      generate pasafer sands file\n";
+    out << "  -l      length of password to get\n";
     out << "  --file  pasafer sands file\n";
     out << "  --size  size of sands file to generate\n";
     return 0;
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
     QString file_name="pasafer.sands";
     qint32  file_size = 100;
     QString key="";
+    int password_len = 8;
     QString password;
     Pasafer pasafer(QCryptographicHash::Sha1);
 
@@ -86,6 +88,8 @@ int main(int argc, char *argv[])
                 file_size = QString(argv[++i]).toInt();
             } else if (arg == "-k") {
                 key = argv[++i];
+            } else if (arg == "-l") {
+                password_len = QString(argv[++i]).toInt();
             }
         }
     }
@@ -102,7 +106,7 @@ int main(int argc, char *argv[])
         pasafer.set_sands_file(file_name);
         pasafer.set_main_password(password);
         pasafer.set_key(key);
-        password = pasafer.get_password(8);
+        password = pasafer.get_password(password_len);
         QTextStream out(stdout);
         out << password <<"\n";
         return 0;

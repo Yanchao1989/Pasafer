@@ -122,13 +122,18 @@ QString Pasafer::get_password(int len)
 {
     QFile file;
     QByteArray qb;
-    QByteArray base64;
-    int per_byte = hash_len/len;
+    int per_byte;
     uchar data_nums[MAX_STATE_LEN];
     uchar password[MAX_STATE_LEN];
     int state_index = MAX_STATES_NUM - 1;
     int i,j;
-    int running = 1;
+    int running = 2;
+
+    if (len > hash_len) {
+        len = hash_len;
+    }
+
+    per_byte = hash_len/len;
 
     memset(password, 0, sizeof(password));
 
@@ -169,36 +174,39 @@ QString Pasafer::get_password(int len)
         i = file.read((char *)data_nums, hash_len);
         if(i != hash_len)
         {
+            running--;
+            file.seek(0);
             if (i) {
                 buff_hash((const uchar*)data_nums, i, data_nums);
                 transform(data_nums, states[state_index], 1,0);
             } else {
-                break;
+                continue;
             }
-            running  = 0;
         }
         transform(data_nums, r_key, 1,0);
         transform(states[state_index], data_nums, 1,0);
+        transform(this->key_char, states[state_index], 1,0);
         transform(data_nums, this->main_password_char, 1, 1);
         transform(data_nums, states[state_index], 1,1);
         transform(r_key,data_nums, 1, 0);
+        transform(this->key_char, data_nums, 1, 1);
 
         state_index += (data_nums[r_key[1]%hash_len] + states[state_index][r_key[0]%hash_len]);
         state_index %= MAX_STATES_NUM;
     }
     file.close();
 
+#define MAP_TO_PRINTABLE(ch) ((ch%('~'-' '))+' ')
+
     for (i = 0; i < len;  i++) {
         for (j = 0; j < per_byte && i*per_byte+j < hash_len; j++) {
             password[i] ^= r_key[i*per_byte+j];
         }
+        password[i] =  MAP_TO_PRINTABLE(password[i]);
     }
+    password[len] = 0;
 
-    base64.setRawData((const char *)password, len);
-    base64 = base64.toBase64();
-    base64.remove(len, base64.length()-len);
-    return QString(base64);
-
+    return QString((const char*)password);
 }
 
 void Pasafer::buff_hash(const uchar *buff, int len, uchar *result)
